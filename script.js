@@ -99,5 +99,12 @@ var build_flight_interface = function () {
 
   body.empty();
   body.append('<div id="title_div"><h1>Flight Information</h1></div>' +
-      '<div id="info_div"></div>');
+      '<div id="main_div"></div>');
+
+  let mainDiv = $("#main_div");
+  let userInputDiv = $("<div id=\"userInput\"></div>");
+  mainDiv.append(userInputDiv);
+  
+  userInputDiv.append("<textarea class=\"location_area\" cols=\"40\" rows=\"1\" placeholder=\"Type location here.\" id=\"location_str\"></textarea>");
+  userInputDiv.append("<textarea class=\"destination_area\" cols=\"40\" rows=\"1\" placeholder=\"Type destination here.\" id=\"destination_str\"></textarea>");
 }
