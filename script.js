@@ -11,9 +11,6 @@ $(document).ready(() => {
 		user = $('#login_user').val();
 		pass = $('#login_pass').val();
 
-    alert(user);
-    alert(pass);
-
 		console.log(user);
 		console.log(pass);
 		// alert("presssed");
@@ -86,7 +83,7 @@ var build_register_interface = function () {
   let body = $('body');
 
   body.empty();
-  body.append('<h1>Register New User</h1>' +
+  body.append('<div id="title_div"><h1>Register New User</h1></div>' +
       '<div id="register_div">' +
       'Username: <input type="text" id="reg_user"><br>' +
       'Password: <input type="text" id="reg_pass"><br>' +
@@ -97,4 +94,10 @@ var build_register_interface = function () {
 
 var build_flight_interface = function () {
   alert("building flight interface");
+
+  let body = $('body');
+
+  body.empty();
+  body.append('<div id="title_div"><h1>Flight Information</h1></div>' +
+      '<div id="info_div"></div>');
 }
