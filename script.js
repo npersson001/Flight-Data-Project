@@ -140,7 +140,7 @@ function get_flights(user_location, user_destination, airports){
 			}
 		});
 	}
-	console.log(valid_flights); // just outputing flights to console for now 
+	console.log(valid_flights); // just outputing flights to console for now
 
 }
 
@@ -173,5 +173,28 @@ var build_flight_interface = function () {
 
   userInputDiv.append("<textarea class=\"location_area\" cols=\"40\" rows=\"1\" placeholder=\"Type location here.\" id=\"location_str\"></textarea>");
   userInputDiv.append("<textarea class=\"destination_area\" cols=\"40\" rows=\"1\" placeholder=\"Type destination here.\" id=\"destination_str\"></textarea>");
-	userInputDiv.append('<button id="submit_flight_search_btn">Search</button>')
+	userInputDiv.append('<button id="submit_flight_search_btn">Search</button>');
+
+  let airport_cities = [];
+
+  $.ajax(root_url + 'airports', {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (response) => {
+      for (let i = 0; i < response.length; i++){
+        airport = response[i];
+        if(!airport_cities.includes(airport['city'])){
+          airport_cities.push(airport['city']);
+        }
+      }
+    }
+  });
+
+  $('#location_str').autocomplete({
+    source: airport_cities
+  });
+
+  $('#destination_str').autocomplete({
+    source: airport_cities
+  });
 }
