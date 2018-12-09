@@ -3,7 +3,7 @@ var user;
 var pass;
 
 $(document).ready(() => {
-	alert("script starting");
+	//alert("script starting");
 
   $(document).on('click', '#login_btn', () => {
     alert("attempting login");
@@ -13,8 +13,8 @@ $(document).ready(() => {
 
 		console.log(user);
 		console.log(pass);
-		// alert("presssed");
-		
+		alert("presssed");
+
 		$.ajax(root_url + 'sessions', {
       type: 'POST',
       dataType: 'json',
@@ -33,12 +33,12 @@ $(document).ready(() => {
         alert('Login failed!');
       }
     });
-  });  
+  });
 
   $('#register_btn').on('click', () => {
     alert("pressed register button");
     build_register_interface();
-  }); 
+  });
 
   $(document).on('click', '#submit_registration_btn', () => {
     alert("pressing sumbitting registration button");
@@ -79,6 +79,65 @@ $(document).ready(() => {
 
 });
 
+$(document).on('click', '#submit_flight_search_btn', () => {
+	alert("pressing sumbitting flight search button");
+
+	// get location info from text boxes
+	user_location_input = $('#location_str').val().toLowerCase().trim();
+	user_destination_input = $('#destination_str').val().toLowerCase().trim();
+
+	// for now, will assume locations will be exact city names
+	// we can discuss how exactly we want to handle this
+
+	// make sure no empty strings
+	if(user_location_input == "" || user_destination_input == "" ){
+		alert("Must give input in all textboxes!");
+	}
+	// otherwise register the user, note that we dont check if the user already exists
+	else{
+		$.ajax(root_url + 'airports', {
+			type: 'GET',
+			xhrFields: {withCredentials: true},
+			success: (response) => {
+				get_flights(user_location_input, user_destination_input, response);
+			}
+		});
+	}
+});
+
+function get_flights(user_location, user_destination, airports){
+	let location_airports = [];
+	let destination_airports = [];
+	let valid_flights = [];
+	for (let i = 0; i < airports.length; i++){
+		airport = airports[i];
+		if (airport['city'].toLowerCase() == user_location){
+			location_airports.push(airport['id']);
+		}
+		if (airport['city'].toLowerCase() == user_destination){
+			destination_airports.push(airport['id']);
+		}
+	}
+	for (let i = 0; i < location_airports.length; i++){
+		location_airport = location_airports[i];
+		$.ajax(root_url + 'flights?filter[departure_id]=' + location_airport, {
+			type: 'GET',
+			xhrFields: {withCredentials: true},
+			success: (flights) => {
+				for (let j = 0; j < flights.length; j++){
+					flight = flights[j];
+					if (destination_airports.includes(flight['arrival_id'])){
+						valid_flights.push(flight);
+					}
+				}
+				console.log(valid_flights);
+			}
+		});
+	}
+
+}
+
+
 var build_register_interface = function () {
   let body = $('body');
 
@@ -88,7 +147,7 @@ var build_register_interface = function () {
       'Username: <input type="text" id="reg_user"><br>' +
       'Password: <input type="text" id="reg_pass"><br>' +
       'Confirm password: <input type="text" id="reg_conf"><br>' +
-      '<button id="submit_registration_btn">Register</button>' + 
+      '<button id="submit_registration_btn">Register</button>' +
       '</div>');
 }
 
@@ -104,7 +163,8 @@ var build_flight_interface = function () {
   let mainDiv = $("#main_div");
   let userInputDiv = $("<div id=\"userInput\"></div>");
   mainDiv.append(userInputDiv);
-  
+
   userInputDiv.append("<textarea class=\"location_area\" cols=\"40\" rows=\"1\" placeholder=\"Type location here.\" id=\"location_str\"></textarea>");
   userInputDiv.append("<textarea class=\"destination_area\" cols=\"40\" rows=\"1\" placeholder=\"Type destination here.\" id=\"destination_str\"></textarea>");
+	userInputDiv.append('<button id="submit_flight_search_btn">Search</button>')
 }
