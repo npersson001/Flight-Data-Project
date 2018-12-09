@@ -109,6 +109,8 @@ function get_flights(user_location, user_destination, airports){
 	let location_airports = [];
 	let destination_airports = [];
 	let valid_flights = [];
+
+	// finding airports in location and destination cities
 	for (let i = 0; i < airports.length; i++){
 		airport = airports[i];
 		if (airport['city'].toLowerCase() == user_location){
@@ -118,22 +120,27 @@ function get_flights(user_location, user_destination, airports){
 			destination_airports.push(airport['id']);
 		}
 	}
+
+	// finding flights one location at a time
 	for (let i = 0; i < location_airports.length; i++){
 		location_airport = location_airports[i];
+
+		// finding flights that match each location
 		$.ajax(root_url + 'flights?filter[departure_id]=' + location_airport, {
 			type: 'GET',
 			xhrFields: {withCredentials: true},
 			success: (flights) => {
+				// for each flight that matches the location id, find the flights that end one of the airports in the desination city
 				for (let j = 0; j < flights.length; j++){
 					flight = flights[j];
 					if (destination_airports.includes(flight['arrival_id'])){
 						valid_flights.push(flight);
 					}
 				}
-				console.log(valid_flights);
 			}
 		});
 	}
+	console.log(valid_flights); // just outputing flights to console for now 
 
 }
 
