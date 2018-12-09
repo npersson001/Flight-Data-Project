@@ -110,6 +110,9 @@ function get_flights(user_location, user_destination, airports){
 	let destination_airports = [];
 	let valid_flights = [];
 
+  let outputDiv = $("#output_div");
+  outputDiv.empty();
+
 	// finding airports in location and destination cities
 	for (let i = 0; i < airports.length; i++){
 		airport = airports[i];
@@ -135,13 +138,13 @@ function get_flights(user_location, user_destination, airports){
 					flight = flights[j];
 					if (destination_airports.includes(flight['arrival_id'])){
 						valid_flights.push(flight);
+            outputDiv.append("<div class=\"flight_option\">" + flight['number'] + "</div>");
 					}
 				}
 			}
 		});
 	}
 	console.log(valid_flights); // just outputing flights to console for now 
-
 }
 
 
@@ -169,9 +172,17 @@ var build_flight_interface = function () {
 
   let mainDiv = $("#main_div");
   let userInputDiv = $("<div id=\"userInput\"></div>");
+  let outputDiv = $("<div id=\"output_div\"></div>");
   mainDiv.append(userInputDiv);
+  mainDiv.append(outputDiv);
 
   userInputDiv.append("<textarea class=\"location_area\" cols=\"40\" rows=\"1\" placeholder=\"Type location here.\" id=\"location_str\"></textarea>");
   userInputDiv.append("<textarea class=\"destination_area\" cols=\"40\" rows=\"1\" placeholder=\"Type destination here.\" id=\"destination_str\"></textarea>");
 	userInputDiv.append('<button id="submit_flight_search_btn">Search</button>')
+}
+
+var update_output = function(valid_flights) {
+  for(let k = 0; k < valid_flights.length; k++){
+    alert(valid_flights[k]['number']);
+  }
 }
