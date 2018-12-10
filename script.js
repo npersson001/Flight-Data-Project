@@ -105,6 +105,48 @@ $(document).on('click', '#submit_flight_search_btn', () => {
 	}
 });
 
+// pull up more detailed information for specific flight
+$(document).on('click', '.select_flight_btn', () => {
+  alert("pressing select flight button");
+  let button_clicked = $(document.activeElement);
+  let flight_id = button_clicked.parent().attr('id');
+
+  $.ajax(root_url + 'flights?filter[number]=' + flight_id, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (flight) => {
+      let userInput = $("#userInput");
+      userInput.empty();
+      let outputDiv = $("#output_div");
+      outputDiv.empty();
+
+      let flight_section = $("<section class=\"selected_flight_section\"></section>");
+      outputDiv.append(flight_section);
+
+      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
+          + "<td class=\"flight_value\">" + flight[0]['number'] + "</td></tr>");
+      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
+          + "<td class=\"flight_value\">" + flight[0]['departs_at'] + "</td></tr>");
+      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
+          + "<td class=\"flight_value\">" + flight[0]['arrives_at'] + "</td></tr>");
+
+      // new info to add with ajax calls
+      flight_section.append("<tr class=\"\"><td>" + "Departing airport:" + "</td><td id=\"departing_airport\"></td></tr>");
+      flight_section.append("<tr class=\"\"><td>" + "Arriving airport:" + "</td><td id=\"arriving_airport\"></td></tr>");
+      flight_section.append("<tr class=\"\"><td>" + "Airline:" + "</td><td id=\"airline\"></td></tr>");
+
+      let depart_id = flight[0]['departure_id'];
+      let arrive_id = flight[0]['arrival_id'];
+      let airline_id = flight[0]['airline_id'];
+
+      set_airport(depart_id, "departing_airport");
+      set_airport(arrive_id, "arriving_airport");
+      set_airline(airline_id);
+
+    }
+  });
+});
+
 function get_flights(user_location, user_destination, airports){
 	let location_airports = [];
 	let destination_airports = [];
@@ -138,14 +180,15 @@ function get_flights(user_location, user_destination, airports){
 					flight = flights[j];
 					if (destination_airports.includes(flight['arrival_id'])){
 						valid_flights.push(flight);
-            let flightSection = $("<section class=\"flight_section\"><table class=\"flight_table\"></table></section>");
+            let flightSection = $("<section id=\"" + flight['number'] + "\" class=\"flight_section\"><table class=\"flight_table\"></table></section>");
             outputDiv.append(flightSection);
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "flight number:" + "</td>"
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
                 + "<td class=\"flight_value\">" + flight['number'] + "</td></tr>");
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "departure time:" + "</td>"
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
                 + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "arrival time:" + "</td>"
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
                 + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
+            flightSection.append('<button class="select_flight_btn">Select Flight</button>');
 					}
 				}
 			}
@@ -231,4 +274,24 @@ var update_output = function(valid_flights) {
   for(let k = 0; k < valid_flights.length; k++){
     alert(valid_flights[k]['number']);
   }
+}
+
+var set_airport = function(aid, str) {
+  $.ajax(root_url + 'airports/' + aid, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (response) => {
+      $('#' + str).html(response['name']);
+    }  
+  });
+}
+
+var set_airline = function(air_id) {
+  $.ajax(root_url + 'airlines/' + air_id, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (response) => {
+      $('#airline').html(response['name']);
+    }  
+  });
 }
