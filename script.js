@@ -138,7 +138,14 @@ function get_flights(user_location, user_destination, airports){
 					flight = flights[j];
 					if (destination_airports.includes(flight['arrival_id'])){
 						valid_flights.push(flight);
-            outputDiv.append("<div class=\"flight_option\">" + flight['number'] + "</div>");
+            let flightSection = $("<section class=\"flight_section\"><table class=\"flight_table\"></table></section>");
+            outputDiv.append(flightSection);
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "flight number:" + "</td>" 
+                + "<td class=\"flight_value\">" + flight['number'] + "</td></tr>");
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "departure time:" + "</td>" 
+                + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "arrival time:" + "</td>" 
+                + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
 					}
 				}
 			}
