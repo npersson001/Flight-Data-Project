@@ -6,14 +6,11 @@ $(document).ready(() => {
 	//alert("script starting");
 
   $(document).on('click', '#login_btn', () => {
-    alert("attempting login");
-
 		user = $('#login_user').val();
 		pass = $('#login_pass').val();
 
 		console.log(user);
 		console.log(pass);
-		alert("presssed");
 
 		$.ajax(root_url + 'sessions', {
       type: 'POST',
@@ -135,12 +132,16 @@ $(document).on('click', '.select_flight_btn', () => {
       flight_section.append("<tr class=\"\"><td>" + "Arriving airport:" + "</td><td id=\"arriving_airport\"></td></tr>");
       flight_section.append("<tr class=\"\"><td>" + "Airline:" + "</td><td id=\"airline\"></td></tr>");
 
+      outputDiv.append('<div id="map"></div>');
+      // $('body').append('<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQ2RE82-6LpZPO_Bog3GusK0at1Df47z0&callback=initMap"></script>');
+      // initMap();
+
       let depart_id = flight[0]['departure_id'];
       let arrive_id = flight[0]['arrival_id'];
       let airline_id = flight[0]['airline_id'];
 
-      set_airport(depart_id, "departing_airport");
-      set_airport(arrive_id, "arriving_airport");
+      set_departing_airport(depart_id);
+      set_arriving_airport(arrive_id);
       set_airline(airline_id);
 
     }
@@ -276,12 +277,23 @@ var update_output = function(valid_flights) {
   }
 }
 
-var set_airport = function(aid, str) {
+var set_arriving_airport = function(aid) {
   $.ajax(root_url + 'airports/' + aid, {
     type: 'GET',
     xhrFields: {withCredentials: true},
     success: (response) => {
-      $('#' + str).html(response['name']);
+      $("#arriving_airport").html(response['name']);
+      initialize(response['latitude'], response['longitude']);
+    }  
+  });
+}
+
+var set_departing_airport = function(aid){
+  $.ajax(root_url + 'airports/' + aid, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (response) => {
+      $("#departing_airport").html(response['name']);
     }  
   });
 }
@@ -293,5 +305,30 @@ var set_airline = function(air_id) {
     success: (response) => {
       $('#airline').html(response['name']);
     }  
+  });
+}
+
+// var map;
+// function initMap() {
+//   // alert("callback called");
+//   map = new google.maps.Map(document.getElementById('map'), {
+//     center: {lat: -34.397, lng: 150.644},
+//     zoom: 8
+//   });
+// }
+
+// function initMap() {
+//   $("#map").googleMap({
+//     zoom: 10, // Initial zoom level (optional)
+//     coords: [48.895651, 2.290569], // Map center (optional)
+//     type: "ROADMAP" // Map type (optional)
+//   });
+// }
+
+var map;
+var initialize = function(input_lat, input_lng) {
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat: parseInt(input_lat), lng: parseInt(input_lng)},
+    zoom: 8
   });
 }

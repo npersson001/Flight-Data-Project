@@ -2,6 +2,8 @@
 body {
 	background: #D3D3D3;
   	font-size: 20pt;
+  	height: 100%;
+	width: 100%;
 }
 
 div {
@@ -27,3 +29,30 @@ td {
 	margin: 5px;
 }
 
+#map {
+	height: 100%;
+	width: 100%;
+}
+
+#output_div {
+	height: 100%;
+	width: 100%;
+}
+
+#main_div {
+	height: 100%;
+	width: 100%;
+}
+
+html {
+	height: 100%;
+	width: 100%;
+}
+
+/*/* Optional: Makes the sample page fill the window. 
+html, body {
+	height: 100%;
+	margin: 0;
+	padding: 0;
+}
+*/
