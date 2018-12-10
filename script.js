@@ -169,10 +169,25 @@ var build_flight_interface = function () {
 
   let mainDiv = $("#main_div");
   let userInputDiv = $("<div id=\"userInput\"></div>");
+
   mainDiv.append(userInputDiv);
 
-  userInputDiv.append("<textarea class=\"location_area\" cols=\"40\" rows=\"1\" placeholder=\"Type location here.\" id=\"location_str\"></textarea>");
-  userInputDiv.append("<textarea class=\"destination_area\" cols=\"40\" rows=\"1\" placeholder=\"Type destination here.\" id=\"destination_str\"></textarea>");
+  userInputDiv.append(`
+    <div>
+      <input class="location_area" cols="40" rows="1" placeholder="Type location here." id="location_str">
+      <ul id = "location_input_box"></ul>
+    </div>
+   `
+  );
+
+  userInputDiv.append(`
+    <div>
+      <input class="destination_area" cols="40" rows="1" placeholder="Type destination here." id="destination_str">
+      <ul id = "destination_input_box"></ul>
+    </div>
+   `
+  );
+
 	userInputDiv.append('<button id="submit_flight_search_btn">Search</button>');
 
   let airport_cities = [];
@@ -191,10 +206,12 @@ var build_flight_interface = function () {
   });
 
   $('#location_str').autocomplete({
-    source: airport_cities
+    source: airport_cities,
+    appendTo: "#location_input_box"
   });
 
   $('#destination_str').autocomplete({
-    source: airport_cities
+    source: airport_cities,
+    appendTo: "#destination_input_box"
   });
 }
