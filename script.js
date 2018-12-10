@@ -110,6 +110,9 @@ function get_flights(user_location, user_destination, airports){
 	let destination_airports = [];
 	let valid_flights = [];
 
+  let outputDiv = $("#output_div");
+  outputDiv.empty();
+
 	// finding airports in location and destination cities
 	for (let i = 0; i < airports.length; i++){
 		airport = airports[i];
@@ -135,13 +138,20 @@ function get_flights(user_location, user_destination, airports){
 					flight = flights[j];
 					if (destination_airports.includes(flight['arrival_id'])){
 						valid_flights.push(flight);
+            let flightSection = $("<section class=\"flight_section\"><table class=\"flight_table\"></table></section>");
+            outputDiv.append(flightSection);
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "flight number:" + "</td>"
+                + "<td class=\"flight_value\">" + flight['number'] + "</td></tr>");
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "departure time:" + "</td>"
+                + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "arrival time:" + "</td>"
+                + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
 					}
 				}
 			}
 		});
 	}
 	console.log(valid_flights); // just outputing flights to console for now
-
 }
 
 
@@ -169,8 +179,9 @@ var build_flight_interface = function () {
 
   let mainDiv = $("#main_div");
   let userInputDiv = $("<div id=\"userInput\"></div>");
-
+  let outputDiv = $("<div id=\"output_div\"></div>");
   mainDiv.append(userInputDiv);
+  mainDiv.append(outputDiv);
 
   userInputDiv.append(`
     <div>
@@ -214,4 +225,10 @@ var build_flight_interface = function () {
     source: airport_cities,
     appendTo: "#destination_input_box"
   });
+}
+
+var update_output = function(valid_flights) {
+  for(let k = 0; k < valid_flights.length; k++){
+    alert(valid_flights[k]['number']);
+  }
 }
