@@ -102,7 +102,12 @@ $(document).on('click', '#submit_flight_search_btn', () => {
 	}
 });
 
-// back button clicked
+// back button clicked from register
+$(document).on('click', '#navbar-back-register', () => {
+  build_login_interface();
+});
+
+// back button clicked from flight 
 $(document).on('click', '#navbar-back-flight', () => {
   build_flight_interface();
 });
@@ -214,6 +219,9 @@ var build_register_interface = function () {
   let body = $('body');
 
   body.empty();
+  let navbar = $('#navbar');
+  navbar.empty();
+  body.append('<nav id="navbar"><input type="button" class="navbar-item" value="Back" id="navbar-back-register"></nav>');
   body.append('<div id="title_div"><h1>Register New User</h1></div>' +
       '<div id="register_div">' +
       'Username: <input type="text" id="reg_user"><br>' +
@@ -243,7 +251,7 @@ var build_flight_interface = function () {
 
   body.empty();
   body.append('<nav id="navbar"><input type="button" class="navbar-item" value="Logout" id="navbar-logout"></nav>');
-  body.append('<div id="title_div"><h1>Flight Information</h1></div>' +
+  body.append('<div id="title_div"><h1>Start your Adventure Today!</h1></div>' +
       '<div id="main_div"></div>');
 
   let mainDiv = $("#main_div");

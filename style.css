@@ -1,19 +1,33 @@
 
+
 body {
-	background: #D3D3D3;
+	/*background: #D3D3D3;*/
   	font-size: 20pt;
+	float: center;
+	margin-left: auto;
+	margin-right: auto;
+	width: 95%;
+  	height: 90%;
+}
+
+html {
+  	background: url(https://images.alphacoders.com/674/674925.png) no-repeat center center fixed; 
+  	-webkit-background-size: cover;
+  	-moz-background-size: cover;
+  	-o-background-size: cover;
+  	background-size: cover;
+/*  	height: auto;
+  	width: auto;*/
+  	float: center;
+  	width: 100%;
   	height: 100%;
-	width: 100%;
 }
 
 div {
-/*  	border: medium solid black;
-  	background: #FFFFFF;
-*/  	
 	margin-left: auto;
   	margin-right: auto;
   	text-align: center;
-  	margin: 5px;
+  	/*margin: 5px;*/
 }
 
 section {
@@ -22,11 +36,12 @@ section {
   	margin-left: auto;
   	margin-right: auto;
   	text-align: center;
-  	margin: 5px;
+  	padding: 10px;
+  	margin: 10px;
 }
 
 td {
-	margin: 5px;
+	margin: 10px;
 }
 
 #map {
@@ -44,18 +59,25 @@ td {
 	width: 100%;
 }
 
-html {
-	height: 100%;
-	width: 100%;
+nav {
+	text-align: right;
 }
 
-#navbar-logout {
+#title_div {
+	text-align: center;
+}
+
+/*#navbar-logout {
 	float: right;
 }
 
 #navbar-back-flight {
 	float: right;
 }
+
+#navbar-back-register {
+	float: right;
+}*/
 
 /*/* Optional: Makes the sample page fill the window. 
 html, body {
@@ -64,3 +86,5 @@ html, body {
 	padding: 0;
 }
 */
+
+
