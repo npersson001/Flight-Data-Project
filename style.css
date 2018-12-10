@@ -49,6 +49,14 @@ html {
 	width: 100%;
 }
 
+#navbar-logout {
+	float: right;
+}
+
+#navbar-back-flight {
+	float: right;
+}
+
 /*/* Optional: Makes the sample page fill the window. 
 html, body {
 	height: 100%;

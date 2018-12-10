@@ -102,9 +102,22 @@ $(document).on('click', '#submit_flight_search_btn', () => {
 	}
 });
 
+// back button clicked
+$(document).on('click', '#navbar-back-flight', () => {
+  build_flight_interface();
+});
+
+// logout button clicked, reset login page
+$(document).on('click', '#navbar-logout', () => {
+  build_login_interface();
+});
+
 // pull up more detailed information for specific flight
 $(document).on('click', '.select_flight_btn', () => {
   alert("pressing select flight button");
+  let navbar = $('#navbar');
+  navbar.empty();
+  navbar.append('<input type="button" class="navbar-item" value="Back" id="navbar-back-flight">');
   let button_clicked = $(document.activeElement);
   let flight_id = button_clicked.parent().attr('id');
 
@@ -133,15 +146,13 @@ $(document).on('click', '.select_flight_btn', () => {
       flight_section.append("<tr class=\"\"><td>" + "Airline:" + "</td><td id=\"airline\"></td></tr>");
 
       outputDiv.append('<div id="map"></div>');
-      // $('body').append('<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBQ2RE82-6LpZPO_Bog3GusK0at1Df47z0&callback=initMap"></script>');
-      // initMap();
 
       let depart_id = flight[0]['departure_id'];
       let arrive_id = flight[0]['arrival_id'];
       let airline_id = flight[0]['airline_id'];
 
       set_departing_airport(depart_id);
-      set_arriving_airport(arrive_id);
+      set_arriving_airport(arrive_id); // map call inside this function
       set_airline(airline_id);
 
     }
@@ -212,12 +223,26 @@ var build_register_interface = function () {
       '</div>');
 }
 
+var build_login_interface = function () {
+  let body = $('body');
+  body.empty();
+  body.append('<div id="title_div">' +
+      '<h1>Login</h1></div>' +
+      '<div id="login_div">' +
+      'Username: <input type="text" id="login_user"><br>' +
+      'Password: <input type="text" id="login_pass"><br>' +
+      '<button id="login_btn">Login</button>' +
+      '<button id="register_btn">Register</button>' +
+      '</div>');
+}
+
 var build_flight_interface = function () {
   alert("building flight interface");
 
   let body = $('body');
 
   body.empty();
+  body.append('<nav id="navbar"><input type="button" class="navbar-item" value="Logout" id="navbar-logout"></nav>');
   body.append('<div id="title_div"><h1>Flight Information</h1></div>' +
       '<div id="main_div"></div>');
 
@@ -307,23 +332,6 @@ var set_airline = function(air_id) {
     }  
   });
 }
-
-// var map;
-// function initMap() {
-//   // alert("callback called");
-//   map = new google.maps.Map(document.getElementById('map'), {
-//     center: {lat: -34.397, lng: 150.644},
-//     zoom: 8
-//   });
-// }
-
-// function initMap() {
-//   $("#map").googleMap({
-//     zoom: 10, // Initial zoom level (optional)
-//     coords: [48.895651, 2.290569], // Map center (optional)
-//     type: "ROADMAP" // Map type (optional)
-//   });
-// }
 
 var map;
 var initialize = function(input_lat, input_lng) {
