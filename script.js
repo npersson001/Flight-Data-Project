@@ -129,6 +129,7 @@ function get_flights(user_location, user_destination, airports){
 		location_airport = location_airports[i];
 
 		// finding flights that match each location
+
 		$.ajax(root_url + 'flights?filter[departure_id]=' + location_airport, {
 			type: 'GET',
 			xhrFields: {withCredentials: true},
@@ -136,6 +137,7 @@ function get_flights(user_location, user_destination, airports){
 				// for each flight that matches the location id, find the flights that end one of the airports in the desination city
 				for (let j = 0; j < flights.length; j++){
 					flight = flights[j];
+          let available_ticket_count =  get_ticket_count(flight['id'], flight['plane_id']);
 					if (destination_airports.includes(flight['arrival_id'])){
 						valid_flights.push(flight);
             let flightSection = $("<section class=\"flight_section\"><table class=\"flight_table\"></table></section>");
@@ -146,12 +148,60 @@ function get_flights(user_location, user_destination, airports){
                 + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
             flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "arrival time:" + "</td>"
                 + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "tickets available:" + "</td>"
+                + "<td class=\"flight_value\">" + available_ticket_count + "</td></tr>");
 					}
 				}
 			}
 		});
 	}
 	console.log(valid_flights); // just outputing flights to console for now
+}
+
+function get_ticket_count(flight_id, plane_id){ // this method doesn't work
+
+
+  let flight_seat_count = 0;
+  let tickets_sold = 0;
+
+  $.ajax(root_url + 'seats?filter[plane_id]=' + plane_id, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (seats) => {
+      flight_seat_count = seats.length;
+      console.log('number of seats after ajax call: ' + flight_seat_count);
+
+    }
+  });
+  console.log('number of seats: ' + flight_seat_count); // not the same as the one above
+
+  $.ajax(root_url + 'instances?filter[flight_id]=' + flight_id, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (instances) => {
+      for(let i = 0; i < instances.length; i++){
+        instance = instances[i];
+        if(!instance['is_canceled']){
+          $.ajax(root_url + 'tickets?filter[instance_id]=' + instance['id'], {
+            type: 'GET',
+            xhrFields: {withCredentials: true},
+            success: (tickets) => {
+              for(let j = 0; j < tickets.length; j++){
+                ticket = tickets[j];
+                if(ticket['is_purchased']){
+                  tickets_sold++;
+                }
+              }
+            }
+          });
+        }
+      }
+    }
+  });
+
+
+  return(flight_seat_count - tickets_sold);
+
 }
 
 
