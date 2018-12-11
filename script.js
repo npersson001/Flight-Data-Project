@@ -6,14 +6,11 @@ $(document).ready(() => {
 	//alert("script starting");
 
   $(document).on('click', '#login_btn', () => {
-    alert("attempting login");
-
 		user = $('#login_user').val();
 		pass = $('#login_pass').val();
 
 		console.log(user);
 		console.log(pass);
-		alert("presssed");
 
 		$.ajax(root_url + 'sessions', {
       type: 'POST',
@@ -35,7 +32,7 @@ $(document).ready(() => {
     });
   });
 
-  $('#register_btn').on('click', () => {
+  $(document).on('click', '#register_btn', () => {
     alert("pressed register button");
     build_register_interface();
   });
@@ -79,6 +76,24 @@ $(document).ready(() => {
 
 });
 
+$(document).on('click', '.purchase_btn', () => {
+  let button_clicked = $(document.activeElement);
+  let flight_id = button_clicked.attr('id');
+
+  let outputDiv = $('#output_div');
+  outputDiv.empty();
+
+  let userInput = $("#userInput");
+  let purchase_section = $('<section class="purchase_section">' +
+      'First Name: <input type="text" id="purchase_fname"><br>' +
+      'Last Name: <input type="text" id="purchase_lname"><br>' +
+      'Age: <input type="text" id="purchase_age"><br>' +
+      'Gender: <input type="text" id="purchase_gender"><br>' +
+      '<button class="button" id="confirm_purchase_btn">Confirm Purchase</button>' +
+      '</section>');
+  userInput.append(purchase_section);
+});
+
 $(document).on('click', '#submit_flight_search_btn', () => {
 	alert("pressing sumbitting flight search button");
 
@@ -105,6 +120,70 @@ $(document).on('click', '#submit_flight_search_btn', () => {
 	}
 });
 
+// back button clicked from register
+$(document).on('click', '#navbar-back-register', () => {
+  build_login_interface();
+});
+
+// back button clicked from flight
+$(document).on('click', '#navbar-back-flight', () => {
+  build_flight_interface();
+});
+
+// logout button clicked, reset login page
+$(document).on('click', '#navbar-logout', () => {
+  build_login_interface();
+});
+
+// pull up more detailed information for specific flight
+$(document).on('click', '.select_flight_btn', () => {
+  alert("pressing select flight button");
+  let navbar = $('#navbar');
+  navbar.empty();
+  navbar.append('<input type="button" class="navbar-item button" value="Back" id="navbar-back-flight">');
+  let button_clicked = $(document.activeElement);
+  let flight_id = button_clicked.parent().attr('id');
+
+  $.ajax(root_url + 'flights?filter[number]=' + flight_id, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (flight) => {
+      let userInput = $("#userInput");
+      userInput.empty();
+      let outputDiv = $("#output_div");
+      outputDiv.empty();
+
+      let flight_section = $("<section class=\"selected_flight_section\"></section>");
+      outputDiv.append(flight_section);
+
+      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
+          + "<td class=\"flight_value\">" + flight[0]['number'] + "</td></tr>");
+      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
+          + "<td class=\"flight_value\">" + flight[0]['departs_at'] + "</td></tr>");
+      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
+          + "<td class=\"flight_value\">" + flight[0]['arrives_at'] + "</td></tr>");
+
+      // new info to add with ajax calls
+      flight_section.append("<tr class=\"\"><td>" + "Departing airport:" + "</td><td id=\"departing_airport\"></td></tr>");
+      flight_section.append("<tr class=\"\"><td>" + "Arriving airport:" + "</td><td id=\"arriving_airport\"></td></tr>");
+      flight_section.append("<tr class=\"\"><td>" + "Airline:" + "</td><td id=\"airline\"></td></tr>");
+
+      flight_section.append('<button class="purchase_btn button" id="' + flight['id'] + '">Purchase Ticket</button>');
+
+      outputDiv.append('<div id="map"></div>');
+
+      let depart_id = flight[0]['departure_id'];
+      let arrive_id = flight[0]['arrival_id'];
+      let airline_id = flight[0]['airline_id'];
+
+      set_departing_airport(depart_id);
+      set_arriving_airport(arrive_id); // map call inside this function
+      set_airline(airline_id);
+
+    }
+  });
+});
+
 function get_flights(user_location, user_destination, airports){
 	let location_airports = [];
 	let destination_airports = [];
@@ -129,7 +208,6 @@ function get_flights(user_location, user_destination, airports){
 		location_airport = location_airports[i];
 
 		// finding flights that match each location
-
 		$.ajax(root_url + 'flights?filter[departure_id]=' + location_airport, {
 			type: 'GET',
 			xhrFields: {withCredentials: true},
@@ -137,27 +215,162 @@ function get_flights(user_location, user_destination, airports){
 				// for each flight that matches the location id, find the flights that end one of the airports in the desination city
 				for (let j = 0; j < flights.length; j++){
 					flight = flights[j];
-          let available_ticket_count =  get_ticket_count(flight['id'], flight['plane_id']);
 					if (destination_airports.includes(flight['arrival_id'])){
 						valid_flights.push(flight);
-            console.log(j);
-            console.log(flight);
-            let flightSection = $("<section class=\"flight_section\"><table class=\"flight_table\"></table></section>");
+            let available_ticket_count =  get_ticket_count(flight['id'], flight['plane_id']);
+            let flightSection = $("<section id=\"" + flight['number'] + "\" class=\"flight_section\"><table class=\"flight_table\"></table></section>");
             outputDiv.append(flightSection);
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "flight number:" + "</td>"
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
                 + "<td class=\"flight_value\">" + flight['number'] + "</td></tr>");
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "departure time:" + "</td>"
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
                 + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "arrival time:" + "</td>"
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
                 + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
             flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "tickets available:" + "</td>"
                 + "<td class=\"flight_value\">" + available_ticket_count + "</td></tr>");
+            flightSection.append('<button class="select_flight_btn button">Select Flight</button>');
 					}
 				}
 			}
 		});
 	}
 	console.log(valid_flights); // just outputing flights to console for now
+}
+
+var build_register_interface = function () {
+  let body = $('body');
+
+  body.empty();
+  let navbar = $('#navbar');
+  navbar.empty();
+  body.append('<nav id="navbar"><input type="button" class="navbar-item button" value="Back" id="navbar-back-register"></nav>');
+  body.append('<div id="title_div"><h1>Register New User</h1></div>' +
+      '<div id="register_div">' +
+      'Username: <input type="text" id="reg_user"><br>' +
+      'Password: <input type="text" id="reg_pass"><br>' +
+      'Confirm password: <input type="text" id="reg_conf"><br>' +
+      '<button class="button" id="submit_registration_btn">Register</button>' +
+      '</div>');
+}
+
+var build_login_interface = function () {
+  let body = $('body');
+  body.empty();
+  body.append('<div id="title_div">' +
+      '<h1>Login</h1></div>' +
+      '<div id="login_div">' +
+      'Username: <input type="text" id="login_user"><br>' +
+      'Password: <input type="text" id="login_pass"><br>' +
+      '<button class="button" id="login_btn">Login</button>' +
+      '<button class="button" id="register_btn">Register</button>' +
+      '</div>');
+}
+
+var build_flight_interface = function () {
+  alert("building flight interface");
+
+  let body = $('body');
+
+  body.empty();
+  body.append('<nav id="navbar"><input type="button" class="navbar-item button" value="Logout" id="navbar-logout"></nav>');
+  body.append('<div id="title_div"><h1>Start your Adventure Today!</h1></div>' +
+      '<div id="main_div"></div>');
+
+  let mainDiv = $("#main_div");
+  let userInputDiv = $("<div id=\"userInput\"></div>");
+  let outputDiv = $("<div id=\"output_div\"></div>");
+  mainDiv.append(userInputDiv);
+  mainDiv.append(outputDiv);
+
+  let locationInputs = $("<section class = \"container\"></section>");
+
+  locationInputs.append(`
+    <div class = "location_area_div">
+      <input class="location_area" cols="40" rows="1" placeholder="Type location here." id="location_str">
+      <ul id = "location_input_box"></ul>
+    </div>
+   `
+  );
+
+  locationInputs.append(`
+    <div class = "destionation_area_div">
+      <input class="destination_area" cols="40" rows="1" placeholder="Type destination here." id="destination_str">
+      <ul id = "destination_input_box"></ul>
+    </div>
+   `
+  );
+
+  locationInputs.append('<br><div class = "submit_search_button_div"><button id="submit_flight_search_btn">Search</button></div>');
+
+  userInputDiv.append(locationInputs);
+
+  let airport_cities = [];
+
+  $.ajax(root_url + 'airports', {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (response) => {
+      for (let i = 0; i < response.length; i++){
+        airport = response[i];
+        if(!airport_cities.includes(airport['city'])){
+          airport_cities.push(airport['city']);
+        }
+      }
+    }
+  });
+
+  $('#location_str').autocomplete({
+    source: airport_cities
+  });
+
+  $('#destination_str').autocomplete({
+    source: airport_cities
+  });
+}
+
+var update_output = function(valid_flights) {
+  for(let k = 0; k < valid_flights.length; k++){
+    alert(valid_flights[k]['number']);
+  }
+}
+
+var set_arriving_airport = function(aid) {
+  $.ajax(root_url + 'airports/' + aid, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (response) => {
+      $("#arriving_airport").html(response['name']);
+      initialize(response['latitude'], response['longitude']);
+    }
+  });
+}
+
+var set_departing_airport = function(aid){
+  $.ajax(root_url + 'airports/' + aid, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (response) => {
+      $("#departing_airport").html(response['name']);
+    }
+  });
+}
+
+var set_airline = function(air_id) {
+  $.ajax(root_url + 'airlines/' + air_id, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (response) => {
+      $('#airline').html(response['name']);
+    }
+  });
+}
+
+var map;
+var initialize = function(input_lat, input_lng) {
+  map = new google.maps.Map(document.getElementById('map'), {
+    center: {lat: parseInt(input_lat), lng: parseInt(input_lng)},
+    zoom: 8
+  });
 }
 
 function get_ticket_count(flight_id, plane_id){ // this method doesn't work
@@ -204,89 +417,4 @@ function get_ticket_count(flight_id, plane_id){ // this method doesn't work
 
   return(flight_seat_count - tickets_sold);
 
-}
-
-
-var build_register_interface = function () {
-  let body = $('body');
-
-  body.empty();
-  body.append('<div id="title_div"><h1>Register New User</h1></div>' +
-      '<div id="register_div">' +
-      'Username: <input type="text" id="reg_user"><br>' +
-      'Password: <input type="text" id="reg_pass"><br>' +
-      'Confirm password: <input type="text" id="reg_conf"><br>' +
-      '<button id="submit_registration_btn">Register</button>' +
-      '</div>');
-}
-
-var build_flight_interface = function () {
-  alert("building flight interface");
-
-  let body = $('body');
-
-  body.empty();
-  body.append('<div id="title_div"><h1>Flight Information</h1></div>' +
-      '<div id="main_div"></div>');
-
-  let mainDiv = $("#main_div");
-  let userInputDiv = $("<div id=\"userInput\"></div>");
-  let outputDiv = $("<div id=\"output_div\"></div>");
-  mainDiv.append(userInputDiv);
-  mainDiv.append(outputDiv);
-
-  let locationInputs = $("<section class = \"container\"></section>");
-
-  locationInputs.append(`
-    <div class = "location_area_div">
-      <input class="location_area" cols="40" rows="1" placeholder="Type location here." id="location_str">
-      <ul id = "location_input_box"></ul>
-    </div>
-   `
-  );
-
-  locationInputs.append(`
-    <div class = "destionation_area_div">
-      <input class="destination_area" cols="40" rows="1" placeholder="Type destination here." id="destination_str">
-      <ul id = "destination_input_box"></ul>
-    </div>
-   `
-  );
-
-  locationInputs.append('<br><div class = "submit_search_button_div"><button id="submit_flight_search_btn">Search</button></div>');
-
-  userInputDiv.append(locationInputs);
-
-	//userInputDiv.append('<button id="submit_flight_search_btn">Search</button>');
-
-  let airport_cities = [];
-
-  $.ajax(root_url + 'airports', {
-    type: 'GET',
-    xhrFields: {withCredentials: true},
-    success: (response) => {
-      for (let i = 0; i < response.length; i++){
-        airport = response[i];
-        if(!airport_cities.includes(airport['city'])){
-          airport_cities.push(airport['city']);
-        }
-      }
-    }
-  });
-
-  $('#location_str').autocomplete({
-    source: airport_cities
-    //appendTo: "#location_input_box"
-  });
-
-  $('#destination_str').autocomplete({
-    source: airport_cities
-    //appendTo: "#destination_input_box"
-  });
-}
-
-var update_output = function(valid_flights) {
-  for(let k = 0; k < valid_flights.length; k++){
-    alert(valid_flights[k]['number']);
-  }
 }
