@@ -7,7 +7,7 @@ body {
 div {
 /*  	border: medium solid black;
   	background: #FFFFFF;
-*/  	
+*/
 	margin-left: auto;
   	margin-right: auto;
   	text-align: center;
@@ -27,3 +27,25 @@ td {
 	margin: 5px;
 }
 
+.container {
+    margin: auto;
+		justify-content: center;
+}
+
+.location_area_div {
+    float: left;
+		margin-left: 25%;
+}
+.destionation_area_div {
+	float:right;
+	margin-right: 25%;
+}
+
+
+#submit_flight_search_btn {
+	float: center;
+}
+.submit_search_button_div{
+	width: 100%;
+	text-align: center;
+}
