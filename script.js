@@ -32,7 +32,7 @@ $(document).ready(() => {
     });
   });
 
-  $('#register_btn').on('click', () => {
+  $(document).on('click', '#register_btn', () => {
     alert("pressed register button");
     build_register_interface();
   });
@@ -74,6 +74,24 @@ $(document).ready(() => {
     }
   });
 
+});
+
+$(document).on('click', '.purchase_btn', () => {
+  let button_clicked = $(document.activeElement);
+  let flight_id = button_clicked.attr('id');
+
+  let outputDiv = $('#output_div');
+  outputDiv.empty();
+
+  let userInput = $("#userInput");
+  let purchase_section = $('<section class="purchase_section">' + 
+      'First Name: <input type="text" id="purchase_fname"><br>' +
+      'Last Name: <input type="text" id="purchase_lname"><br>' +
+      'Age: <input type="text" id="purchase_age"><br>' +
+      'Gender: <input type="text" id="purchase_gender"><br>' +
+      '<button class="button" id="confirm_purchase_btn">Confirm Purchase</button>' +
+      '</section>');
+  userInput.append(purchase_section);
 });
 
 $(document).on('click', '#submit_flight_search_btn', () => {
@@ -122,7 +140,7 @@ $(document).on('click', '.select_flight_btn', () => {
   alert("pressing select flight button");
   let navbar = $('#navbar');
   navbar.empty();
-  navbar.append('<input type="button" class="navbar-item" value="Back" id="navbar-back-flight">');
+  navbar.append('<input type="button" class="navbar-item button" value="Back" id="navbar-back-flight">');
   let button_clicked = $(document.activeElement);
   let flight_id = button_clicked.parent().attr('id');
 
@@ -149,6 +167,8 @@ $(document).on('click', '.select_flight_btn', () => {
       flight_section.append("<tr class=\"\"><td>" + "Departing airport:" + "</td><td id=\"departing_airport\"></td></tr>");
       flight_section.append("<tr class=\"\"><td>" + "Arriving airport:" + "</td><td id=\"arriving_airport\"></td></tr>");
       flight_section.append("<tr class=\"\"><td>" + "Airline:" + "</td><td id=\"airline\"></td></tr>");
+
+      flight_section.append('<button class="purchase_btn button" id="' + flight['id'] + '">Purchase Ticket</button>');
 
       outputDiv.append('<div id="map"></div>');
 
@@ -205,7 +225,7 @@ function get_flights(user_location, user_destination, airports){
                 + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
             flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
                 + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
-            flightSection.append('<button class="select_flight_btn">Select Flight</button>');
+            flightSection.append('<button class="select_flight_btn button">Select Flight</button>');
 					}
 				}
 			}
@@ -214,20 +234,19 @@ function get_flights(user_location, user_destination, airports){
 	console.log(valid_flights); // just outputing flights to console for now
 }
 
-
 var build_register_interface = function () {
   let body = $('body');
 
   body.empty();
   let navbar = $('#navbar');
   navbar.empty();
-  body.append('<nav id="navbar"><input type="button" class="navbar-item" value="Back" id="navbar-back-register"></nav>');
+  body.append('<nav id="navbar"><input type="button" class="navbar-item button" value="Back" id="navbar-back-register"></nav>');
   body.append('<div id="title_div"><h1>Register New User</h1></div>' +
       '<div id="register_div">' +
       'Username: <input type="text" id="reg_user"><br>' +
       'Password: <input type="text" id="reg_pass"><br>' +
       'Confirm password: <input type="text" id="reg_conf"><br>' +
-      '<button id="submit_registration_btn">Register</button>' +
+      '<button class="button" id="submit_registration_btn">Register</button>' +
       '</div>');
 }
 
@@ -239,8 +258,8 @@ var build_login_interface = function () {
       '<div id="login_div">' +
       'Username: <input type="text" id="login_user"><br>' +
       'Password: <input type="text" id="login_pass"><br>' +
-      '<button id="login_btn">Login</button>' +
-      '<button id="register_btn">Register</button>' +
+      '<button class="button" id="login_btn">Login</button>' +
+      '<button class="button" id="register_btn">Register</button>' +
       '</div>');
 }
 
@@ -250,7 +269,7 @@ var build_flight_interface = function () {
   let body = $('body');
 
   body.empty();
-  body.append('<nav id="navbar"><input type="button" class="navbar-item" value="Logout" id="navbar-logout"></nav>');
+  body.append('<nav id="navbar"><input type="button" class="navbar-item button" value="Logout" id="navbar-logout"></nav>');
   body.append('<div id="title_div"><h1>Start your Adventure Today!</h1></div>' +
       '<div id="main_div"></div>');
 
@@ -276,7 +295,7 @@ var build_flight_interface = function () {
    `
   );
 
-	userInputDiv.append('<button id="submit_flight_search_btn">Search</button>');
+	userInputDiv.append('<button class="button" id="submit_flight_search_btn">Search</button>');
 
   let airport_cities = [];
 
