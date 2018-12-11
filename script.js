@@ -226,9 +226,11 @@ function get_flights(user_location, user_destination, airports){
                 + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
             flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
                 + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "tickets available:" + "</td>"
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Tickets available:" + "</td>"
                 + "<td class=\"flight_value\">" + available_ticket_count + "</td></tr>");
-            flightSection.append('<button class="select_flight_btn button">Select Flight</button>');
+            if(available_ticket_count > 0){
+              flightSection.append('<button class="select_flight_btn button">Select Flight</button>');
+            }
 					}
 				}
 			}
