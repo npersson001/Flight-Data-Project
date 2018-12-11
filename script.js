@@ -76,6 +76,51 @@ $(document).ready(() => {
 
 });
 
+$(document).on('click', '.confirm_purchase_btn', () => {
+  let button_clicked = $(document.activeElement);
+  let flight_id = button_clicked.attr('id');
+  alert(flight_id);
+
+  $.ajax(root_url + 'instances?filter[flight_id]=' + flight_id, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    async: false,
+    success: (instances) => {
+      for(let i = 0; i < instances.length; i++){
+        instance = instances[i];
+
+        let fname = $('#purchase_fname').val();
+        let lname = $('#purchase_lname').val();
+        let age = $('#purchase_age').val();
+        let gender = $('#purchase_gender').val();
+
+        $.ajax(root_url + 'tickets', {
+          type: 'POST',
+          data: {
+            "ticket": {
+              "first_name":   fname,
+              "last_name":    lname,
+              "age":          age,
+              "gender":       gender,
+              "is_purchased": true,
+              "instance_id":  instance['id'],
+              // "seat_id":      21
+            }
+          },
+          xhrFields: {withCredentials: true},
+          success: (response) => {
+            let userInput = $("#userInput");
+            userInput.empty();
+            userInput.append('<section class="successful_section">Purchase Successful!</section>');
+          }
+        });
+        
+      }
+    }
+  });
+
+});
+
 $(document).on('click', '.purchase_btn', () => {
   let button_clicked = $(document.activeElement);
   let flight_id = button_clicked.attr('id');
@@ -84,12 +129,12 @@ $(document).on('click', '.purchase_btn', () => {
   outputDiv.empty();
 
   let userInput = $("#userInput");
-  let purchase_section = $('<section class="purchase_section">' +
+  let purchase_section = $('<section class="purchase_section">' + 
       'First Name: <input type="text" id="purchase_fname"><br>' +
       'Last Name: <input type="text" id="purchase_lname"><br>' +
       'Age: <input type="text" id="purchase_age"><br>' +
       'Gender: <input type="text" id="purchase_gender"><br>' +
-      '<button class="button" id="confirm_purchase_btn">Confirm Purchase</button>' +
+      '<button class="button confirm_purchase_btn" id="' + flight_id + '">Confirm Purchase</button>' +
       '</section>');
   userInput.append(purchase_section);
 });
@@ -136,7 +181,7 @@ $(document).on('click', '#navbar-logout', () => {
 });
 
 // pull up more detailed information for specific flight
-$(document).on('click', '.select_flight_btn', () => {
+$(document).on('click', '.select_instance_btn', () => {
   alert("pressing select flight button");
   let navbar = $('#navbar');
   navbar.empty();
@@ -168,7 +213,7 @@ $(document).on('click', '.select_flight_btn', () => {
       flight_section.append("<tr class=\"\"><td>" + "Arriving airport:" + "</td><td id=\"arriving_airport\"></td></tr>");
       flight_section.append("<tr class=\"\"><td>" + "Airline:" + "</td><td id=\"airline\"></td></tr>");
 
-      flight_section.append('<button class="purchase_btn button" id="' + flight['id'] + '">Purchase Ticket</button>');
+      flight_section.append('<button class="purchase_btn button" id="' + flight[0]['id'] + '">Purchase Ticket</button>');
 
       outputDiv.append('<div id="map"></div>');
 
@@ -228,7 +273,7 @@ function get_flights(user_location, user_destination, airports){
                 + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
             flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "tickets available:" + "</td>"
                 + "<td class=\"flight_value\">" + available_ticket_count + "</td></tr>");
-            flightSection.append('<button class="select_flight_btn button">Select Flight</button>');
+            flightSection.append('<button class="select_instance_btn button">Select Flight</button>');
 					}
 				}
 			}
@@ -374,8 +419,6 @@ var initialize = function(input_lat, input_lng) {
 }
 
 function get_ticket_count(flight_id, plane_id){ // this method doesn't work
-
-
   let flight_seat_count = 0;
   let tickets_sold = 0;
 
@@ -414,7 +457,5 @@ function get_ticket_count(flight_id, plane_id){ // this method doesn't work
     }
   });
 
-
   return(flight_seat_count - tickets_sold);
-
 }
