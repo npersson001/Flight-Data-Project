@@ -167,6 +167,7 @@ function get_ticket_count(flight_id, plane_id){ // this method doesn't work
   $.ajax(root_url + 'seats?filter[plane_id]=' + plane_id, {
     type: 'GET',
     xhrFields: {withCredentials: true},
+    async: false,
     success: (seats) => {
       flight_seat_count = seats.length;
       console.log('number of seats after ajax call: ' + flight_seat_count);
@@ -178,6 +179,7 @@ function get_ticket_count(flight_id, plane_id){ // this method doesn't work
   $.ajax(root_url + 'instances?filter[flight_id]=' + flight_id, {
     type: 'GET',
     xhrFields: {withCredentials: true},
+    async: false,
     success: (instances) => {
       for(let i = 0; i < instances.length; i++){
         instance = instances[i];
@@ -185,6 +187,7 @@ function get_ticket_count(flight_id, plane_id){ // this method doesn't work
           $.ajax(root_url + 'tickets?filter[instance_id]=' + instance['id'], {
             type: 'GET',
             xhrFields: {withCredentials: true},
+            async: false,
             success: (tickets) => {
               for(let j = 0; j < tickets.length; j++){
                 ticket = tickets[j];
