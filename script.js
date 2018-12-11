@@ -227,7 +227,7 @@ function get_flights(user_location, user_destination, airports){
                 for(let i = 0; i < instances.length; i++){
                   instance = instances[i];
                   if(!instance['is_canceled']){
-                    let available_ticket_count =  get_ticket_count(flight['id'], flight['plane_id']);
+                    let available_ticket_count =  get_ticket_count(flight['plane_id'], instance['id']);
                     let flightSection = $("<section id=\"" + flight['number'] + "\" class=\"flight_section\"><table class=\"flight_table\"></table></section>");
                     outputDiv.append(flightSection);
                     flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
@@ -247,12 +247,6 @@ function get_flights(user_location, user_destination, airports){
                 }
               }
             });
-
-
-
-
-
-
 					}
 				}
 			}
@@ -397,7 +391,7 @@ var initialize = function(input_lat, input_lng) {
   });
 }
 
-function get_ticket_count(flight_id, plane_id){ // this method doesn't work
+function get_ticket_count(plane_id, instance_id){ // this method doesn't work
 
 
   let flight_seat_count = 0;
@@ -412,7 +406,7 @@ function get_ticket_count(flight_id, plane_id){ // this method doesn't work
     }
   });
 
-  $.ajax(root_url + 'instances?filter[flight_id]=' + flight_id, {
+  $.ajax(root_url + 'instances/' +  instance_id, {
     type: 'GET',
     xhrFields: {withCredentials: true},
     async: false,
