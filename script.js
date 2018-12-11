@@ -217,6 +217,7 @@ function get_flights(user_location, user_destination, airports){
 					flight = flights[j];
 					if (destination_airports.includes(flight['arrival_id'])){
 						valid_flights.push(flight);
+            let available_ticket_count =  get_ticket_count(flight['id'], flight['plane_id']);
             let flightSection = $("<section id=\"" + flight['number'] + "\" class=\"flight_section\"><table class=\"flight_table\"></table></section>");
             outputDiv.append(flightSection);
             flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
@@ -225,6 +226,8 @@ function get_flights(user_location, user_destination, airports){
                 + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
             flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
                 + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
+            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "tickets available:" + "</td>"
+                + "<td class=\"flight_value\">" + available_ticket_count + "</td></tr>");
             flightSection.append('<button class="select_flight_btn button">Select Flight</button>');
 					}
 				}
@@ -279,23 +282,27 @@ var build_flight_interface = function () {
   mainDiv.append(userInputDiv);
   mainDiv.append(outputDiv);
 
-  userInputDiv.append(`
-    <div>
+  let locationInputs = $("<section class = \"container\"></section>");
+
+  locationInputs.append(`
+    <div class = "location_area_div">
       <input class="location_area" cols="40" rows="1" placeholder="Type location here." id="location_str">
       <ul id = "location_input_box"></ul>
     </div>
    `
   );
 
-  userInputDiv.append(`
-    <div>
+  locationInputs.append(`
+    <div class = "destionation_area_div">
       <input class="destination_area" cols="40" rows="1" placeholder="Type destination here." id="destination_str">
       <ul id = "destination_input_box"></ul>
     </div>
    `
   );
 
-	userInputDiv.append('<button class="button" id="submit_flight_search_btn">Search</button>');
+  locationInputs.append('<br><div class = "submit_search_button_div"><button id="submit_flight_search_btn">Search</button></div>');
+
+  userInputDiv.append(locationInputs);
 
   let airport_cities = [];
 
@@ -313,13 +320,11 @@ var build_flight_interface = function () {
   });
 
   $('#location_str').autocomplete({
-    source: airport_cities,
-    appendTo: "#location_input_box"
+    source: airport_cities
   });
 
   $('#destination_str').autocomplete({
-    source: airport_cities,
-    appendTo: "#destination_input_box"
+    source: airport_cities
   });
 }
 
@@ -366,4 +371,50 @@ var initialize = function(input_lat, input_lng) {
     center: {lat: parseInt(input_lat), lng: parseInt(input_lng)},
     zoom: 8
   });
+}
+
+function get_ticket_count(flight_id, plane_id){ // this method doesn't work
+
+
+  let flight_seat_count = 0;
+  let tickets_sold = 0;
+
+  $.ajax(root_url + 'seats?filter[plane_id]=' + plane_id, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    async: false,
+    success: (seats) => {
+      flight_seat_count = seats.length;
+    }
+  });
+
+  $.ajax(root_url + 'instances?filter[flight_id]=' + flight_id, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    async: false,
+    success: (instances) => {
+      for(let i = 0; i < instances.length; i++){
+        instance = instances[i];
+        if(!instance['is_canceled']){
+          $.ajax(root_url + 'tickets?filter[instance_id]=' + instance['id'], {
+            type: 'GET',
+            xhrFields: {withCredentials: true},
+            async: false,
+            success: (tickets) => {
+              for(let j = 0; j < tickets.length; j++){
+                ticket = tickets[j];
+                if(ticket['is_purchased']){
+                  tickets_sold++;
+                }
+              }
+            }
+          });
+        }
+      }
+    }
+  });
+
+
+  return(flight_seat_count - tickets_sold);
+
 }
