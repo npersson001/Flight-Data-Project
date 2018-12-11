@@ -216,21 +216,43 @@ function get_flights(user_location, user_destination, airports){
 				for (let j = 0; j < flights.length; j++){
 					flight = flights[j];
 					if (destination_airports.includes(flight['arrival_id'])){
-						valid_flights.push(flight);
-            let available_ticket_count =  get_ticket_count(flight['id'], flight['plane_id']);
-            let flightSection = $("<section id=\"" + flight['number'] + "\" class=\"flight_section\"><table class=\"flight_table\"></table></section>");
-            outputDiv.append(flightSection);
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
-                + "<td class=\"flight_value\">" + flight['number'] + "</td></tr>");
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
-                + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
-                + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Tickets available:" + "</td>"
-                + "<td class=\"flight_value\">" + available_ticket_count + "</td></tr>");
-            if(available_ticket_count > 0){
-              flightSection.append('<button class="select_flight_btn button">Select Flight</button>');
-            }
+            valid_flights.push(flight);
+
+            // finding all instances for that flight
+            $.ajax(root_url + 'instances?filter[flight_id]=' + flight['id'], {
+              type: 'GET',
+              xhrFields: {withCredentials: true},
+              async: false,
+              success: (instances) => {
+                for(let i = 0; i < instances.length; i++){
+                  instance = instances[i];
+                  if(!instance['is_canceled']){
+                    let available_ticket_count =  get_ticket_count(flight['id'], flight['plane_id']);
+                    let flightSection = $("<section id=\"" + flight['number'] + "\" class=\"flight_section\"><table class=\"flight_table\"></table></section>");
+                    outputDiv.append(flightSection);
+                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
+                        + "<td class=\"flight_value\">" + flight['number'] + "</td></tr>");
+                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
+                        + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
+                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
+                        + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
+                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Date:" + "</td>"
+                        + "<td class=\"flight_value\">" + instance['date'] + "</td></tr>");
+                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Tickets available:" + "</td>"
+                        + "<td class=\"flight_value\">" + available_ticket_count + "</td></tr>");
+                    if(available_ticket_count > 0){
+                      flightSection.append('<button class="select_flight_btn button">Select Flight</button>');
+                    }
+                  }
+                }
+              }
+            });
+
+
+
+
+
+
 					}
 				}
 			}
@@ -394,11 +416,11 @@ function get_ticket_count(flight_id, plane_id){ // this method doesn't work
     type: 'GET',
     xhrFields: {withCredentials: true},
     async: false,
-    success: (instances) => {
-      for(let i = 0; i < instances.length; i++){
-        instance = instances[i];
+    success: (instances_count) => {
+      for(let i = 0; i < instances_count.length; i++){
+        instance_count = instances_count[i];
         if(!instance['is_canceled']){
-          $.ajax(root_url + 'tickets?filter[instance_id]=' + instance['id'], {
+          $.ajax(root_url + 'tickets?filter[instance_id]=' + instance_count['id'], {
             type: 'GET',
             xhrFields: {withCredentials: true},
             async: false,
