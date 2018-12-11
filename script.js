@@ -84,7 +84,7 @@ $(document).on('click', '.purchase_btn', () => {
   outputDiv.empty();
 
   let userInput = $("#userInput");
-  let purchase_section = $('<section class="purchase_section">' + 
+  let purchase_section = $('<section class="purchase_section">' +
       'First Name: <input type="text" id="purchase_fname"><br>' +
       'Last Name: <input type="text" id="purchase_lname"><br>' +
       'Age: <input type="text" id="purchase_age"><br>' +
@@ -125,7 +125,7 @@ $(document).on('click', '#navbar-back-register', () => {
   build_login_interface();
 });
 
-// back button clicked from flight 
+// back button clicked from flight
 $(document).on('click', '#navbar-back-flight', () => {
   build_flight_interface();
 });
@@ -336,7 +336,7 @@ var set_arriving_airport = function(aid) {
     success: (response) => {
       $("#arriving_airport").html(response['name']);
       initialize(response['latitude'], response['longitude']);
-    }  
+    }
   });
 }
 
@@ -346,7 +346,7 @@ var set_departing_airport = function(aid){
     xhrFields: {withCredentials: true},
     success: (response) => {
       $("#departing_airport").html(response['name']);
-    }  
+    }
   });
 }
 
@@ -356,7 +356,7 @@ var set_airline = function(air_id) {
     xhrFields: {withCredentials: true},
     success: (response) => {
       $('#airline').html(response['name']);
-    }  
+    }
   });
 }
 
