@@ -99,7 +99,7 @@ $(document).on('click', '.confirm_purchase_btn', () => {
               "last_name":    lname,
               "age":          age,
               "gender":       gender,
-              "is_purchased": true,
+              "is_purchased": 1.0,
               "instance_id":  instance['id'],
               // "seat_id":      21
             }
@@ -423,7 +423,7 @@ var insert_itinerary = function(fname, lname, age, gender, number, instance_id){
               "last_name":    lname,
               "age":          age,
               "gender":       gender,
-              "is_purchased": true,
+              "is_purchased": 1.0,
               "instance_id":  instance_id,
               "itinerary_id": itinerary_id
             }
