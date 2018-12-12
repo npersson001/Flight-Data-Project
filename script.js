@@ -407,27 +407,15 @@ function get_ticket_count(plane_id, instance_id){ // this method doesn't work
     }
   });
 
-  $.ajax(root_url + 'instances/' +  instance_id, {
+  $.ajax(root_url + 'tickets?filter[instance_id]=' + instance_id, {
     type: 'GET',
     xhrFields: {withCredentials: true},
     async: false,
-    success: (instances_count) => {
-      for(let i = 0; i < instances_count.length; i++){
-        instance_count = instances_count[i];
-        if(!instance['is_canceled']){
-          $.ajax(root_url + 'tickets?filter[instance_id]=' + instance_count['id'], {
-            type: 'GET',
-            xhrFields: {withCredentials: true},
-            async: false,
-            success: (tickets) => {
-              for(let j = 0; j < tickets.length; j++){
-                ticket = tickets[j];
-                if(ticket['is_purchased']){
-                  tickets_sold++;
-                }
-              }
-            }
-          });
+    success: (tickets) => {
+      for(let j = 0; j < tickets.length; j++){
+        ticket = tickets[j];
+        if(ticket['is_purchased']){
+          tickets_sold++;
         }
       }
     }
