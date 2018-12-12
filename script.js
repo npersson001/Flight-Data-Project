@@ -232,7 +232,7 @@ function get_flights(user_location, user_destination, airports){
                 for(let i = 0; i < instances.length; i++){
                   instance = instances[i];
                   if(!instance['is_canceled']){
-                    let available_ticket_count =  get_ticket_count(flight['id'], flight['plane_id']);
+                    let available_ticket_count =  get_ticket_count(flight['plane_id'], instance['id']);
                     let flightSection = $("<section id=\"" + instance['id'] + ":" + flight['number'] + "\" class=\"flight_section\"><table class=\"flight_table\"></table></section>");
                     outputDiv.append(flightSection);
                     flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
@@ -296,8 +296,7 @@ var build_flight_interface = function () {
 
   body.empty();
   body.append('<nav id="navbar"><input type="button" class="navbar-item button" value="Logout" id="navbar-logout"></nav>');
-  body.append('<div id="title_div"><h1>Start your Adventure Today!</h1></div>' +
-      '<div id="main_div"></div>');
+  body.append('<div id="main_div"></div>');
 
   let mainDiv = $("#main_div");
   let userInputDiv = $("<div id=\"userInput\"></div>");
@@ -306,6 +305,8 @@ var build_flight_interface = function () {
   mainDiv.append(outputDiv);
 
   let locationInputs = $("<section class = \"container\"></section>");
+
+  locationInputs.append('<div id="title_div"><h1>Start Your Adventure Today!</h1></div>');
 
   locationInputs.append(`
     <div class = "location_area_div">
@@ -439,7 +440,7 @@ var build_information_interface = function(instance_id, flight_id) {
 
 }
 
-function get_ticket_count(flight_id, plane_id){ // this method doesn't work
+function get_ticket_count(plane_id, instance_id){ // this method doesn't work
   let flight_seat_count = 0;
   let tickets_sold = 0;
 
@@ -452,31 +453,18 @@ function get_ticket_count(flight_id, plane_id){ // this method doesn't work
     }
   });
 
-  $.ajax(root_url + 'instances?filter[flight_id]=' + flight_id, {
+  $.ajax(root_url + 'tickets?filter[instance_id]=' + instance_id, {
     type: 'GET',
     xhrFields: {withCredentials: true},
     async: false,
-    success: (instances_count) => {
-      for(let i = 0; i < instances_count.length; i++){
-        instance_count = instances_count[i];
-        if(!instance['is_canceled']){
-          $.ajax(root_url + 'tickets?filter[instance_id]=' + instance_count['id'], {
-            type: 'GET',
-            xhrFields: {withCredentials: true},
-            async: false,
-            success: (tickets) => {
-              for(let j = 0; j < tickets.length; j++){
-                ticket = tickets[j];
-                if(ticket['is_purchased']){
-                  tickets_sold++;
-                }
-              }
-            }
-          });
+    success: (tickets) => {
+      for(let j = 0; j < tickets.length; j++){
+        ticket = tickets[j];
+        if(ticket['is_purchased']){
+          tickets_sold++;
         }
       }
     }
   });
-
   return(flight_seat_count - tickets_sold);
 }

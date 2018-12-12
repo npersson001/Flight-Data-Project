@@ -90,6 +90,16 @@ nav {
 	text-align: center;
 }
 
+#login_info {
+	width: 30%;
+	margin: auto;
+	float: center;
+	position: relative;
+	top: 50%;
+	transform: translateY(-50%);
+
+}
+
 /*/* Optional: Makes the sample page fill the window.
 html, body {
 	height: 100%;
