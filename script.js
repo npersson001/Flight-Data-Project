@@ -226,39 +226,7 @@ function get_flights(user_location, user_destination, airports){
 					flight = flights[j];
 					if (destination_airports.includes(flight['arrival_id'])){
             valid_flights.push(flight);
-
-            // finding all instances for that flight
-            $.ajax(root_url + 'instances?filter[flight_id]=' + flight['id'], {
-              type: 'GET',
-              xhrFields: {withCredentials: true},
-              async: false,
-              success: (instances) => {
-                for(let i = 0; i < instances.length; i++){
-                  instance = instances[i];
-                  if(!instance['is_canceled']){
-                    let flightSection = $("<section id=\"" + instance['id'] + ":" + flight['number'] + ":" + instance['date'] + "\" class=\"flight_section\"></section>");
-                    let tableSection = $("<table class=\"flight_class\"></table>");
-                    flightSection.append(tableSection);
-                    outputDiv.append(flightSection);
-                    // flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
-                    //     + "<td class=\"flight_value\">" + flight['number'] + "</td></tr>");
-                    tableSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Date:" + "</td>"
-                        + "<td class=\"flight_value\">" + instance['date'] + "</td></tr>");
-                    tableSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
-                        + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
-                    tableSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
-                        + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
-                    let ticket_td = $("<td class=\"flight_value\"></td>");
-                    let ticket_tr = $("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Tickets available:" + "</td>"
-                        + "</tr>");
-                    ticket_tr.append(ticket_td);
-                    tableSection.append(ticket_tr);
-
-                    get_ticket_count(flight['plane_id'], instance['id'], ticket_td, flightSection);
-                  }
-                }
-              }
-            });
+            find_all_instances(flight);
 					}
 				}
 			}
@@ -513,6 +481,39 @@ var calculate_ticket_count = function(plane_id, instance_id, ticket_td, flightSe
       ticket_td.append(available_seats);
       if(available_seats  > 0){
         flightSection.append('<button class="select_instance_btn button">Select Flight</button>');
+      }
+    }
+  });
+}
+
+var find_all_instances = function(flight){
+  // finding all instances for that flight
+  $.ajax(root_url + 'instances?filter[flight_id]=' + flight['id'], {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (instances) => {
+      let outputDiv = $("#output_div");
+      for(let i = 0; i < instances.length; i++){
+        instance = instances[i];
+        if(!instance['is_canceled']){
+          let flightSection = $("<section id=\"" + instance['id'] + ":" + flight['number'] + ":" + instance['date'] + "\" class=\"flight_section\"></section>");
+          let tableSection = $("<table class=\"flight_class\"></table>");
+          flightSection.append(tableSection);
+          outputDiv.append(flightSection);
+          tableSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Date:" + "</td>"
+              + "<td class=\"flight_value\">" + instance['date'] + "</td></tr>");
+          tableSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
+              + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
+          tableSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
+              + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
+          let ticket_td = $("<td class=\"flight_value\"></td>");
+          let ticket_tr = $("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Tickets available:" + "</td>"
+              + "</tr>");
+          ticket_tr.append(ticket_td);
+          tableSection.append(ticket_tr);
+
+          get_ticket_count(flight['plane_id'], instance['id'], ticket_td, flightSection);
+        }
       }
     }
   });
