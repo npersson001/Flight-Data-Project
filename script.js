@@ -79,7 +79,6 @@ $(document).on('click', '.confirm_purchase_btn', () => {
   $.ajax(root_url + 'instances/' + instance_id, {
     type: 'GET',
     xhrFields: {withCredentials: true},
-    async: false,
     success: (instance) => {
       let fname = $('#purchase_fname').val();
       let lname = $('#purchase_lname').val();
@@ -237,7 +236,6 @@ function get_flights(user_location, user_destination, airports){
                 for(let i = 0; i < instances.length; i++){
                   instance = instances[i];
                   if(!instance['is_canceled']){
-                    let available_ticket_count =  get_ticket_count(flight['plane_id'], instance['id']);
                     let flightSection = $("<section id=\"" + instance['id'] + ":" + flight['number'] + ":" + instance['date'] + "\" class=\"flight_section\"></section>");
                     let tableSection = $("<table class=\"flight_class\"></table>");
                     flightSection.append(tableSection);
@@ -250,11 +248,13 @@ function get_flights(user_location, user_destination, airports){
                         + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
                     tableSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
                         + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
-                    tableSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Tickets available:" + "</td>"
-                        + "<td class=\"flight_value\">" + available_ticket_count + "</td></tr>");
-                    if(available_ticket_count > 0){
-                      flightSection.append('<button class="select_instance_btn button">Select Flight</button>');
-                    }
+                    let ticket_td = $("<td class=\"flight_value\"></td>");
+                    let ticket_tr = $("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Tickets available:" + "</td>"
+                        + "</tr>");
+                    ticket_tr.append(ticket_td);
+                    tableSection.append(ticket_tr);
+
+                    get_ticket_count(flight['plane_id'], instance['id'], ticket_td, flightSection);
                   }
                 }
               }
@@ -486,31 +486,34 @@ var build_information_interface = function(instance_id, flight_id, instance_date
 
 }
 
-function get_ticket_count(plane_id, instance_id){ // this method doesn't work
-  let flight_seat_count = 0;
-  let tickets_sold = 0;
+var get_ticket_count = function(plane_id, instance_id, ticket_td, flightSection){ 
 
   $.ajax(root_url + 'seats?filter[plane_id]=' + plane_id, {
     type: 'GET',
     xhrFields: {withCredentials: true},
-    async: false,
     success: (seats) => {
-      flight_seat_count = seats.length;
+      calculate_ticket_count(plane_id, instance_id, ticket_td, flightSection, seats.length);
     }
   });
+}
 
+var calculate_ticket_count = function(plane_id, instance_id, ticket_td, flightSection, num_seats){
   $.ajax(root_url + 'tickets?filter[instance_id]=' + instance_id, {
     type: 'GET',
     xhrFields: {withCredentials: true},
-    async: false,
     success: (tickets) => {
+      let tickets_sold = 0;
       for(let j = 0; j < tickets.length; j++){
         ticket = tickets[j];
         if(ticket['is_purchased']){
           tickets_sold++;
         }
       }
+      let available_seats = num_seats - tickets_sold
+      ticket_td.append(available_seats);
+      if(available_seats  > 0){
+        flightSection.append('<button class="select_instance_btn button">Select Flight</button>');
+      }
     }
   });
-  return(flight_seat_count - tickets_sold);
 }
