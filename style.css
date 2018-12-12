@@ -100,6 +100,26 @@ nav {
 
 }
 
+section tr {
+	width: 100%;
+	margin: auto;
+	float: center;
+}
+
+section tr:nth-child(even) {
+  background-color: #eee;
+}
+
+td {
+	text-align: left;
+	width: 50%;
+	margin: auto;
+}
+
+table {
+	width: 100%;
+}
+
 /*/* Optional: Makes the sample page fill the window.
 html, body {
 	height: 100%;

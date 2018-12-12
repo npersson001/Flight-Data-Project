@@ -85,27 +85,37 @@ $(document).on('click', '.confirm_purchase_btn', () => {
       let lname = $('#purchase_lname').val();
       let age = $('#purchase_age').val();
       let gender = $('#purchase_gender').val();
+      let number = parseInt($('#purchase_number').val());
 
-      $.ajax(root_url + 'tickets', {
-        type: 'POST',
-        data: {
-          "ticket": {
-            "first_name":   fname,
-            "last_name":    lname,
-            "age":          age,
-            "gender":       gender,
-            "is_purchased": true,
-            "instance_id":  instance['id'],
-            // "seat_id":      21
+      if (number <= 0){
+        alert("cannot enter a number less than 1");
+      }
+      else if (number == 1){
+        $.ajax(root_url + 'tickets', {
+          type: 'POST',
+          data: {
+            "ticket": {
+              "first_name":   fname,
+              "last_name":    lname,
+              "age":          age,
+              "gender":       gender,
+              "is_purchased": true,
+              "instance_id":  instance['id'],
+              // "seat_id":      21
+            }
+          },
+          xhrFields: {withCredentials: true},
+          success: (response) => {
+            let userInput = $("#userInput");
+            userInput.empty();
+            userInput.append('<section class="successful_section">Purchase Successful!</section>');
           }
-        },
-        xhrFields: {withCredentials: true},
-        success: (response) => {
-          let userInput = $("#userInput");
-          userInput.empty();
-          userInput.append('<section class="successful_section">Purchase Successful!</section>');
-        }
-      });
+        });
+      }
+      else {
+        insert_itinerary(fname, lname, age, gender, number, instance['id']);
+      }
+
     }
   });
 
@@ -119,12 +129,13 @@ $(document).on('click', '.purchase_btn', () => {
   outputDiv.empty();
 
   let userInput = $("#userInput");
-  let purchase_section = $('<section class="purchase_section">' + 
+  let purchase_section = $('<section class="purchase_section"><div id="title_div"><h1>Customer Information</h1></div>' + 
       'First Name: <input type="text" id="purchase_fname"><br>' +
       'Last Name: <input type="text" id="purchase_lname"><br>' +
       'Age: <input type="text" id="purchase_age"><br>' +
       'Gender: <input type="text" id="purchase_gender"><br>' +
-      '<button class="button confirm_purchase_btn" id="' + instance_id + '">Confirm Purchase</button>' +
+      'Number of Tickets: <input type="text" id="purchase_number"><br>' +
+      '<br><button class="button confirm_purchase_btn" id="' + instance_id + '">Confirm Purchase</button><br><br>' +
       '</section>');
   userInput.append(purchase_section);
 });
@@ -178,8 +189,9 @@ $(document).on('click', '.select_instance_btn', () => {
   let instance_flight_id = button_clicked.parent().attr('id');
   let instance_id = instance_flight_id.split(":")[0];
   let flight_id = instance_flight_id.split(":")[1];
+  let instance_date = instance_flight_id.split(":")[2];
 
-  build_information_interface(instance_id, flight_id);
+  build_information_interface(instance_id, flight_id, instance_date);
 });
 
 function get_flights(user_location, user_destination, airports){
@@ -226,17 +238,19 @@ function get_flights(user_location, user_destination, airports){
                   instance = instances[i];
                   if(!instance['is_canceled']){
                     let available_ticket_count =  get_ticket_count(flight['plane_id'], instance['id']);
-                    let flightSection = $("<section id=\"" + instance['id'] + ":" + flight['number'] + "\" class=\"flight_section\"><table class=\"flight_table\"></table></section>");
+                    let flightSection = $("<section id=\"" + instance['id'] + ":" + flight['number'] + ":" + instance['date'] + "\" class=\"flight_section\"></section>");
+                    let tableSection = $("<table class=\"flight_class\"></table>");
+                    flightSection.append(tableSection);
                     outputDiv.append(flightSection);
-                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
-                        + "<td class=\"flight_value\">" + flight['number'] + "</td></tr>");
-                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
-                        + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
-                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
-                        + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
-                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Date:" + "</td>"
+                    // flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
+                    //     + "<td class=\"flight_value\">" + flight['number'] + "</td></tr>");
+                    tableSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Date:" + "</td>"
                         + "<td class=\"flight_value\">" + instance['date'] + "</td></tr>");
-                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Tickets available:" + "</td>"
+                    tableSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
+                        + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
+                    tableSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
+                        + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
+                    tableSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Tickets available:" + "</td>"
                         + "<td class=\"flight_value\">" + available_ticket_count + "</td></tr>");
                     if(available_ticket_count > 0){
                       flightSection.append('<button class="select_instance_btn button">Select Flight</button>');
@@ -260,26 +274,26 @@ var build_register_interface = function () {
   let navbar = $('#navbar');
   navbar.empty();
   body.append('<nav id="navbar"><input type="button" class="navbar-item button" value="Back" id="navbar-back-register"></nav>');
-  body.append('<div id="title_div"><h1>Register New User</h1></div>' +
+  body.append('<section id = "login_info"><div id="title_div"><h1>Register New User</h1></div>' +
       '<div id="register_div">' +
       'Username: <input type="text" id="reg_user"><br>' +
       'Password: <input type="text" id="reg_pass"><br>' +
-      'Confirm password: <input type="text" id="reg_conf"><br>' +
+      'Confirm password: <input type="text" id="reg_conf"><br><br>' +
       '<button class="button" id="submit_registration_btn">Register</button>' +
-      '</div>');
+      '<br><br></div></section>');
 }
 
 var build_login_interface = function () {
   let body = $('body');
   body.empty();
-  body.append('<div id="title_div">' +
+  body.append('<section id = "login_info"><div id="title_div">' +
       '<h1>Login</h1></div>' +
       '<div id="login_div">' +
       'Username: <input type="text" id="login_user"><br>' +
-      'Password: <input type="text" id="login_pass"><br>' +
+      'Password: <input type="text" id="login_pass"><br><br>' +
       '<button class="button" id="login_btn">Login</button>' +
       '<button class="button" id="register_btn">Register</button>' +
-      '</div>');
+      '<br><br></div></section>');
 }
 
 var build_flight_interface = function () {
@@ -315,7 +329,7 @@ var build_flight_interface = function () {
    `
   );
 
-  locationInputs.append('<br><div class = "submit_search_button_div"><button id="submit_flight_search_btn">Search</button></div>');
+  locationInputs.append('<br><br><div class = "submit_search_button_div"><button id="submit_flight_search_btn">Search</button><br><br></div>');
 
   userInputDiv.append(locationInputs);
 
@@ -388,7 +402,45 @@ var initialize = function(input_lat, input_lng) {
   });
 }
 
-var build_information_interface = function(instance_id, flight_id) {
+var insert_itinerary = function(fname, lname, age, gender, number, instance_id){
+  let info = lname+String(number);
+  $.ajax(root_url + 'itineraries', {
+    type: 'POST',
+    data: {
+      "itinerary": {
+        "info": info,
+      }
+    },
+    xhrFields: {withCredentials: true},
+    success: (response) => {
+      let itinerary_id = response['id'];
+      for(let i = 0; i < number; i++){
+        $.ajax(root_url + 'tickets', {
+          type: 'POST',
+          data: {
+            "ticket": {
+              "first_name":   fname,
+              "last_name":    lname,
+              "age":          age,
+              "gender":       gender,
+              "is_purchased": true,
+              "instance_id":  instance_id,
+              "itinerary_id": itinerary_id
+            }
+          },
+          xhrFields: {withCredentials: true},
+          success: (response) => {
+            let userInput = $("#userInput");
+            userInput.empty();
+            userInput.append('<section class="successful_section">Purchase Successful!</section>');
+          }
+        });
+      }
+    }
+  });
+}
+
+var build_information_interface = function(instance_id, flight_id, instance_date) {
 
   $.ajax(root_url + 'flights?filter[number]=' + flight_id, {
     type: 'GET',
@@ -399,22 +451,25 @@ var build_information_interface = function(instance_id, flight_id) {
       let outputDiv = $("#output_div");
       outputDiv.empty();
 
-      let flight_section = $("<section class=\"selected_flight_section\"></section>");
+      let flight_section = $('<section class="selected_flight_section"><div id="title_div"><h1>Flight Information</h1></div></section>');
       outputDiv.append(flight_section);
+      let table_section = $("<table class=\"information_class\"></table>");
+      flight_section.append(table_section);
 
-      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
+      table_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
           + "<td class=\"flight_value\">" + flight[0]['number'] + "</td></tr>");
-      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
+      table_section.append("<tr class=\"\"><td>" + "Airline:" + "</td><td id=\"airline\"></td></tr>");
+      table_section.append("<tr class=\"\"><td>" + "Date:" + "</td><td id=\"date\">" + instance_date + "</td></tr>");
+      table_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
           + "<td class=\"flight_value\">" + flight[0]['departs_at'] + "</td></tr>");
-      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
+      table_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
           + "<td class=\"flight_value\">" + flight[0]['arrives_at'] + "</td></tr>");
 
       // new info to add with ajax calls
-      flight_section.append("<tr class=\"\"><td>" + "Departing airport:" + "</td><td id=\"departing_airport\"></td></tr>");
-      flight_section.append("<tr class=\"\"><td>" + "Arriving airport:" + "</td><td id=\"arriving_airport\"></td></tr>");
-      flight_section.append("<tr class=\"\"><td>" + "Airline:" + "</td><td id=\"airline\"></td></tr>");
+      table_section.append("<tr class=\"\"><td>" + "Departing airport:" + "</td><td id=\"departing_airport\"></td></tr>");
+      table_section.append("<tr class=\"\"><td>" + "Arriving airport:" + "</td><td id=\"arriving_airport\"></td></tr>");
 
-      flight_section.append('<button class="purchase_btn button" id="' + instance_id + '">Purchase Ticket</button>');
+      flight_section.append('<br><button class="purchase_btn button" id="' + instance_id + '">Purchase Ticket</button><br><br>');
 
       outputDiv.append('<div id="map"></div>');
 
