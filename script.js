@@ -3,8 +3,6 @@ var user;
 var pass;
 
 $(document).ready(() => {
-	//alert("script starting");
-
   $(document).on('click', '#login_btn', () => {
 		user = $('#login_user').val();
 		pass = $('#login_pass').val();
@@ -33,12 +31,10 @@ $(document).ready(() => {
   });
 
   $(document).on('click', '#register_btn', () => {
-    alert("pressed register button");
     build_register_interface();
   });
 
   $(document).on('click', '#submit_registration_btn', () => {
-    alert("pressing sumbitting registration button");
 
     // get user info from text boxes
     user = $('#reg_user').val();
@@ -79,7 +75,6 @@ $(document).ready(() => {
 $(document).on('click', '.confirm_purchase_btn', () => {
   let button_clicked = $(document.activeElement);
   let instance_id = button_clicked.attr('id');
-  alert(instance_id);
 
   $.ajax(root_url + 'instances/' + instance_id, {
     type: 'GET',
@@ -135,7 +130,6 @@ $(document).on('click', '.purchase_btn', () => {
 });
 
 $(document).on('click', '#submit_flight_search_btn', () => {
-	alert("pressing sumbitting flight search button");
 
 	// get location info from text boxes
 	user_location_input = $('#location_str').val().toLowerCase().trim();
@@ -177,7 +171,6 @@ $(document).on('click', '#navbar-logout', () => {
 
 // pull up more detailed information for specific flight
 $(document).on('click', '.select_instance_btn', () => {
-  alert("pressing select instance button");
   let navbar = $('#navbar');
   navbar.empty();
   navbar.append('<input type="button" class="navbar-item button" value="Back" id="navbar-back-flight">');
@@ -290,8 +283,6 @@ var build_login_interface = function () {
 }
 
 var build_flight_interface = function () {
-  alert("building flight interface");
-
   let body = $('body');
 
   body.empty();
