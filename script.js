@@ -78,44 +78,39 @@ $(document).ready(() => {
 
 $(document).on('click', '.confirm_purchase_btn', () => {
   let button_clicked = $(document.activeElement);
-  let flight_id = button_clicked.attr('id');
-  alert(flight_id);
+  let instance_id = button_clicked.attr('id');
+  alert(instance_id);
 
-  $.ajax(root_url + 'instances?filter[flight_id]=' + flight_id, {
+  $.ajax(root_url + 'instances/' + instance_id, {
     type: 'GET',
     xhrFields: {withCredentials: true},
     async: false,
-    success: (instances) => {
-      for(let i = 0; i < instances.length; i++){
-        instance = instances[i];
+    success: (instance) => {
+      let fname = $('#purchase_fname').val();
+      let lname = $('#purchase_lname').val();
+      let age = $('#purchase_age').val();
+      let gender = $('#purchase_gender').val();
 
-        let fname = $('#purchase_fname').val();
-        let lname = $('#purchase_lname').val();
-        let age = $('#purchase_age').val();
-        let gender = $('#purchase_gender').val();
-
-        $.ajax(root_url + 'tickets', {
-          type: 'POST',
-          data: {
-            "ticket": {
-              "first_name":   fname,
-              "last_name":    lname,
-              "age":          age,
-              "gender":       gender,
-              "is_purchased": true,
-              "instance_id":  instance['id'],
-              // "seat_id":      21
-            }
-          },
-          xhrFields: {withCredentials: true},
-          success: (response) => {
-            let userInput = $("#userInput");
-            userInput.empty();
-            userInput.append('<section class="successful_section">Purchase Successful!</section>');
+      $.ajax(root_url + 'tickets', {
+        type: 'POST',
+        data: {
+          "ticket": {
+            "first_name":   fname,
+            "last_name":    lname,
+            "age":          age,
+            "gender":       gender,
+            "is_purchased": true,
+            "instance_id":  instance['id'],
+            // "seat_id":      21
           }
-        });
-        
-      }
+        },
+        xhrFields: {withCredentials: true},
+        success: (response) => {
+          let userInput = $("#userInput");
+          userInput.empty();
+          userInput.append('<section class="successful_section">Purchase Successful!</section>');
+        }
+      });
     }
   });
 
@@ -123,7 +118,7 @@ $(document).on('click', '.confirm_purchase_btn', () => {
 
 $(document).on('click', '.purchase_btn', () => {
   let button_clicked = $(document.activeElement);
-  let flight_id = button_clicked.attr('id');
+  let instance_id = button_clicked.attr('id');
 
   let outputDiv = $('#output_div');
   outputDiv.empty();
@@ -134,7 +129,7 @@ $(document).on('click', '.purchase_btn', () => {
       'Last Name: <input type="text" id="purchase_lname"><br>' +
       'Age: <input type="text" id="purchase_age"><br>' +
       'Gender: <input type="text" id="purchase_gender"><br>' +
-      '<button class="button confirm_purchase_btn" id="' + flight_id + '">Confirm Purchase</button>' +
+      '<button class="button confirm_purchase_btn" id="' + instance_id + '">Confirm Purchase</button>' +
       '</section>');
   userInput.append(purchase_section);
 });
@@ -182,51 +177,16 @@ $(document).on('click', '#navbar-logout', () => {
 
 // pull up more detailed information for specific flight
 $(document).on('click', '.select_instance_btn', () => {
-  alert("pressing select flight button");
+  alert("pressing select instance button");
   let navbar = $('#navbar');
   navbar.empty();
   navbar.append('<input type="button" class="navbar-item button" value="Back" id="navbar-back-flight">');
   let button_clicked = $(document.activeElement);
-  let flight_id = button_clicked.parent().attr('id');
+  let instance_flight_id = button_clicked.parent().attr('id');
+  let instance_id = instance_flight_id.split(":")[0];
+  let flight_id = instance_flight_id.split(":")[1];
 
-  $.ajax(root_url + 'flights?filter[number]=' + flight_id, {
-    type: 'GET',
-    xhrFields: {withCredentials: true},
-    success: (flight) => {
-      let userInput = $("#userInput");
-      userInput.empty();
-      let outputDiv = $("#output_div");
-      outputDiv.empty();
-
-      let flight_section = $("<section class=\"selected_flight_section\"></section>");
-      outputDiv.append(flight_section);
-
-      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
-          + "<td class=\"flight_value\">" + flight[0]['number'] + "</td></tr>");
-      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
-          + "<td class=\"flight_value\">" + flight[0]['departs_at'] + "</td></tr>");
-      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
-          + "<td class=\"flight_value\">" + flight[0]['arrives_at'] + "</td></tr>");
-
-      // new info to add with ajax calls
-      flight_section.append("<tr class=\"\"><td>" + "Departing airport:" + "</td><td id=\"departing_airport\"></td></tr>");
-      flight_section.append("<tr class=\"\"><td>" + "Arriving airport:" + "</td><td id=\"arriving_airport\"></td></tr>");
-      flight_section.append("<tr class=\"\"><td>" + "Airline:" + "</td><td id=\"airline\"></td></tr>");
-
-      flight_section.append('<button class="purchase_btn button" id="' + flight[0]['id'] + '">Purchase Ticket</button>');
-
-      outputDiv.append('<div id="map"></div>');
-
-      let depart_id = flight[0]['departure_id'];
-      let arrive_id = flight[0]['arrival_id'];
-      let airline_id = flight[0]['airline_id'];
-
-      set_departing_airport(depart_id);
-      set_arriving_airport(arrive_id); // map call inside this function
-      set_airline(airline_id);
-
-    }
-  });
+  build_information_interface(instance_id, flight_id);
 });
 
 function get_flights(user_location, user_destination, airports){
@@ -261,19 +221,37 @@ function get_flights(user_location, user_destination, airports){
 				for (let j = 0; j < flights.length; j++){
 					flight = flights[j];
 					if (destination_airports.includes(flight['arrival_id'])){
-						valid_flights.push(flight);
-            let available_ticket_count =  get_ticket_count(flight['id'], flight['plane_id']);
-            let flightSection = $("<section id=\"" + flight['number'] + "\" class=\"flight_section\"><table class=\"flight_table\"></table></section>");
-            outputDiv.append(flightSection);
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
-                + "<td class=\"flight_value\">" + flight['number'] + "</td></tr>");
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
-                + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
-                + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
-            flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "tickets available:" + "</td>"
-                + "<td class=\"flight_value\">" + available_ticket_count + "</td></tr>");
-            flightSection.append('<button class="select_instance_btn button">Select Flight</button>');
+            valid_flights.push(flight);
+
+            // finding all instances for that flight
+            $.ajax(root_url + 'instances?filter[flight_id]=' + flight['id'], {
+              type: 'GET',
+              xhrFields: {withCredentials: true},
+              async: false,
+              success: (instances) => {
+                for(let i = 0; i < instances.length; i++){
+                  instance = instances[i];
+                  if(!instance['is_canceled']){
+                    let available_ticket_count =  get_ticket_count(flight['id'], flight['plane_id']);
+                    let flightSection = $("<section id=\"" + instance['id'] + ":" + flight['number'] + "\" class=\"flight_section\"><table class=\"flight_table\"></table></section>");
+                    outputDiv.append(flightSection);
+                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
+                        + "<td class=\"flight_value\">" + flight['number'] + "</td></tr>");
+                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
+                        + "<td class=\"flight_value\">" + flight['departs_at'] + "</td></tr>");
+                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
+                        + "<td class=\"flight_value\">" + flight['arrives_at'] + "</td></tr>");
+                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Date:" + "</td>"
+                        + "<td class=\"flight_value\">" + instance['date'] + "</td></tr>");
+                    flightSection.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Tickets available:" + "</td>"
+                        + "<td class=\"flight_value\">" + available_ticket_count + "</td></tr>");
+                    if(available_ticket_count > 0){
+                      flightSection.append('<button class="select_instance_btn button">Select Flight</button>');
+                    }
+                  }
+                }
+              }
+            });
 					}
 				}
 			}
@@ -418,6 +396,49 @@ var initialize = function(input_lat, input_lng) {
   });
 }
 
+var build_information_interface = function(instance_id, flight_id) {
+
+  $.ajax(root_url + 'flights?filter[number]=' + flight_id, {
+    type: 'GET',
+    xhrFields: {withCredentials: true},
+    success: (flight) => {
+      let userInput = $("#userInput");
+      userInput.empty();
+      let outputDiv = $("#output_div");
+      outputDiv.empty();
+
+      let flight_section = $("<section class=\"selected_flight_section\"></section>");
+      outputDiv.append(flight_section);
+
+      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Flight number:" + "</td>"
+          + "<td class=\"flight_value\">" + flight[0]['number'] + "</td></tr>");
+      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Departure time:" + "</td>"
+          + "<td class=\"flight_value\">" + flight[0]['departs_at'] + "</td></tr>");
+      flight_section.append("<tr class=\"flight_tr\"><td class=\"flight_key\">" + "Arrival time:" + "</td>"
+          + "<td class=\"flight_value\">" + flight[0]['arrives_at'] + "</td></tr>");
+
+      // new info to add with ajax calls
+      flight_section.append("<tr class=\"\"><td>" + "Departing airport:" + "</td><td id=\"departing_airport\"></td></tr>");
+      flight_section.append("<tr class=\"\"><td>" + "Arriving airport:" + "</td><td id=\"arriving_airport\"></td></tr>");
+      flight_section.append("<tr class=\"\"><td>" + "Airline:" + "</td><td id=\"airline\"></td></tr>");
+
+      flight_section.append('<button class="purchase_btn button" id="' + instance_id + '">Purchase Ticket</button>');
+
+      outputDiv.append('<div id="map"></div>');
+
+      let depart_id = flight[0]['departure_id'];
+      let arrive_id = flight[0]['arrival_id'];
+      let airline_id = flight[0]['airline_id'];
+
+      set_departing_airport(depart_id);
+      set_arriving_airport(arrive_id); // map call inside this function
+      set_airline(airline_id);
+
+    }
+  });
+
+}
+
 function get_ticket_count(flight_id, plane_id){ // this method doesn't work
   let flight_seat_count = 0;
   let tickets_sold = 0;
@@ -435,11 +456,11 @@ function get_ticket_count(flight_id, plane_id){ // this method doesn't work
     type: 'GET',
     xhrFields: {withCredentials: true},
     async: false,
-    success: (instances) => {
-      for(let i = 0; i < instances.length; i++){
-        instance = instances[i];
+    success: (instances_count) => {
+      for(let i = 0; i < instances_count.length; i++){
+        instance_count = instances_count[i];
         if(!instance['is_canceled']){
-          $.ajax(root_url + 'tickets?filter[instance_id]=' + instance['id'], {
+          $.ajax(root_url + 'tickets?filter[instance_id]=' + instance_count['id'], {
             type: 'GET',
             xhrFields: {withCredentials: true},
             async: false,
