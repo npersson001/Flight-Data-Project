@@ -291,8 +291,7 @@ var build_flight_interface = function () {
 
   body.empty();
   body.append('<nav id="navbar"><input type="button" class="navbar-item button" value="Logout" id="navbar-logout"></nav>');
-  body.append('<div id="title_div"><h1>Start your Adventure Today!</h1></div>' +
-      '<div id="main_div"></div>');
+  body.append('<div id="main_div"></div>');
 
   let mainDiv = $("#main_div");
   let userInputDiv = $("<div id=\"userInput\"></div>");
@@ -301,6 +300,8 @@ var build_flight_interface = function () {
   mainDiv.append(outputDiv);
 
   let locationInputs = $("<section class = \"container\"></section>");
+
+  locationInputs.append('<div id="title_div"><h1>Start Your Adventure Today!</h1></div>');
 
   locationInputs.append(`
     <div class = "location_area_div">
